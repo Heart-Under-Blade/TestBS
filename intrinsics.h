@@ -7,6 +7,7 @@
 #define EPS_IN_LINE 0.001
 #define EPS_IN_POLYGON 0.001
 
+//////////////////////////////////////////////////
 struct Point3
 {
 	float point[4];
@@ -19,10 +20,10 @@ struct Point3
 //		point[3] = 0.0f;
 	}
 } __attribute__ ((aligned (16)));
-
+//////////////////////////////////////////////////
 struct Polygon
 {
-	Point3 point[32];
+	Point3 vertices[32];
 	int size;
 
 	Polygon() {}
@@ -77,13 +78,11 @@ __m128 intersection_i(const Point3 &source_point, const Point3 &source_vector,
 	return _mm_sub_ps(sp, mul);
 }
 //////////////////////////////////////////////////
-int inPolygon_i2(const Point3 &x, Point3 polygon[], const Point3 &normal)
+int inPolygon_i2(const Point3 &x, const Polygon &polygon, const Point3 &normal)
 {
 	int res = 1;
-	int size = 6;
-
-	__m128 _x = _mm_load_ps(x.point);
-	__m128 _n = _mm_load_ps(normal.point);
+	int size = polygon.size;
+	int i = 0;
 
 	__m128 dir;
 
@@ -91,10 +90,11 @@ int inPolygon_i2(const Point3 &x, Point3 polygon[], const Point3 &normal)
 	__m128 m_eps = _mm_set_ss(-EPS_IN_POLYGON);
 	__m128 zero = _mm_set_ss(0);
 
-	int i = 0;
+	__m128 _x = _mm_load_ps(x.point);
+	__m128 _n = _mm_load_ps(normal.point);
 
-	__m128 p1 = _mm_load_ps(polygon[size-1].point);
-	__m128 p2 = _mm_load_ps(polygon[i].point);
+	__m128 p1 = _mm_load_ps(polygon.vertices[size-1].point);
+	__m128 p2 = _mm_load_ps(polygon.vertices[i].point);
 
 	do {
 		dir = _mm_dp_ps(crossProduct_i(_mm_sub_ps(p2, p1), _mm_sub_ps(_x, p1)), _n, 0x71);
@@ -115,10 +115,54 @@ int inPolygon_i2(const Point3 &x, Point3 polygon[], const Point3 &normal)
 
 		++i;
 		p1 = p2;
-		p2 = _mm_load_ps(polygon[i].point);
+		p2 = _mm_load_ps(polygon.vertices[i].point);
 	}
 	while (i < size);
 
 	return res;
 }
+
+//int inPolygon_i2(const Point3 &x, Point3 polygon[], int size, const Point3 &normal)
+//{
+//	int res = 1;
+
+//	__m128 _x = _mm_load_ps(x.point);
+//	__m128 _n = _mm_load_ps(normal.point);
+
+//	__m128 dir;
+
+//	__m128 eps = _mm_set_ss(EPS_IN_POLYGON);
+//	__m128 m_eps = _mm_set_ss(-EPS_IN_POLYGON);
+//	__m128 zero = _mm_set_ss(0);
+
+//	int i = 0;
+
+//	__m128 p1 = _mm_load_ps(polygon[size-1].point);
+//	__m128 p2 = _mm_load_ps(polygon[i].point);
+
+//	do {
+//		dir = _mm_dp_ps(crossProduct_i(_mm_sub_ps(p2, p1), _mm_sub_ps(_x, p1)), _n, 0x71);
+
+//		if (_mm_ucomilt_ss(dir, zero))
+//		{
+//			if (_mm_ucomigt_ss(dir, m_eps)) {
+//				res = 0;
+//			}
+//			else {
+////				res = -1;
+//				return -1;
+//			}
+//		}
+//		else if (_mm_ucomilt_ss(dir, eps)) {
+//			res = 0;
+//		}
+
+//		++i;
+//		p1 = p2;
+//		p2 = _mm_load_ps(polygon[i].point);
+//	}
+//	while (i < size);
+
+//	return res;
+//}
 
