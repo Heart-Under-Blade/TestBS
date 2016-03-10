@@ -151,13 +151,6 @@ int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
 
-	std::vector<Point3> polygon;
-	polygon.push_back(Point3(0, 0, 0));
-	polygon.push_back(Point3(1, -1, 0));
-	polygon.push_back(Point3(2, -1, 0));
-	polygon.push_back(Point3(3, 0, 0));
-	polygon.push_back(Point3(2, 1, 0));
-	polygon.push_back(Point3(1, 1, 0));
 	Point3 polyg[6];
 	polyg[0]=Point3(0, 0, 0);
 	polyg[1]=(Point3(1, -1, 0));
