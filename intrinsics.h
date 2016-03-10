@@ -125,16 +125,39 @@ int inPolygon_i2(const Point3 &x, Point3 polygon[], const Point3 &normal)
 	__m128 m_eps = _mm_set_ss(-EPS_IN_POLYGON);
 	__m128 zero = _mm_set_ss(0);
 
-	p2 = _mm_load_ps(polygon[0].point);
+	int i = 0;
 
-	for (int i = 1; i <= size; ++i)
-	{
-		p1 = p2;
+	p1 = _mm_load_ps(polygon[size-1].point);
+	p2 = _mm_load_ps(polygon[i].point);
 
-		p2 = (i != size) ? _mm_load_ps(polygon[i].point)
-						 : _mm_load_ps(polygon[0].point);
-
+	do {
 		dir = _mm_dp_ps(crossProduct_i(_mm_sub_ps(p2, p1), _mm_sub_ps(_x, p1)), _n, 0x71);
+
+		if (_mm_ucomilt_ss(dir, zero))
+		{
+			if (_mm_ucomigt_ss(dir, m_eps)) {
+				res = 0;
+			}
+			else {
+//				res = -1;
+				return -1;
+			}
+		}
+		else if (_mm_ucomilt_ss(dir, eps)) {
+			res = 0;
+		}
+
+		++i;
+		p1 = p2;
+		p2 = _mm_load_ps(polygon[i].point);
+	}
+	while (i < size);
+
+//	for (int i = 1; i <= size; ++i)
+//	{
+//		p1 = p2;
+
+//		dir = _mm_dp_ps(crossProduct_i(_mm_sub_ps(p2, p1), _mm_sub_ps(_x, p1)), _n, 0x71);
 
 //		if (dir[0]<-EPS_IN_POLYGON)
 //			return -1;
@@ -146,19 +169,19 @@ int inPolygon_i2(const Point3 &x, Point3 polygon[], const Point3 &normal)
 //		else if (_mm_ucomilt_ss(dir, eps))
 //			res = 0;
 
-		if (_mm_ucomilt_ss(dir, zero))
-		{
-			if (_mm_ucomigt_ss(dir, m_eps)) {
-				res = 0;
-			}
-			else {
-				res = -1;//return -1;
-			}
-		}
-		else if (_mm_ucomilt_ss(dir, eps)) {
-			res = 0;
-		}
-	}
+//		if (_mm_ucomilt_ss(dir, zero))
+//		{
+//			if (_mm_ucomigt_ss(dir, m_eps)) {
+//				res = 0;
+//			}
+//			else {
+//				res = -1;//return -1;
+//			}
+//		}
+//		else if (_mm_ucomilt_ss(dir, eps)) {
+//			res = 0;
+//		}
+//	}
 
 	return res;
 }
