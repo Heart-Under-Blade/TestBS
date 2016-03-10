@@ -7,7 +7,10 @@
 #include "math.h"
 #include "intrinsics.h"
 
+
 using namespace std;
+
+void crossProduct(const Point3 &p1, const Point3 &p2, Point3 &res);
 
 float dotProduct(const Point3 &p1, const Point3 &p2) {
 	return p1.point[0]*p2.point[0] + p1.point[1]*p2.point[1] + p1.point[2]*p2.point[2];
@@ -16,6 +19,57 @@ float dotProduct(const Point3 &p1, const Point3 &p2) {
 double angle(const Point3 &a, const Point3 &b)
 {
 	return acos(dotProduct(a, b)*sqrt(dotProduct(b, b))/sqrt(dotProduct(a, a)));
+}
+
+/// 1 - in polygon, 0 - in line, -1 - out of polygon
+int inPolygon(const Point3 &x, const std::vector<Point3> &polygon, const Point3 &normal)
+{
+	int res = -2;
+	int size = polygon.size();
+float dir;
+	for (int i = 1; i <= size; ++i)
+	{
+		Point3 p1, p2;
+
+		p1 = polygon.at(i-1);
+
+		p2 = (i != size) ? polygon.at(i)
+						 : polygon.at(0);
+
+		Point3 p12;
+		p12.point[0] = p2.point[0] - p1.point[0];
+		p12.point[1] = p2.point[1] - p1.point[1];
+		p12.point[2] = p2.point[2] - p1.point[2];
+
+		Point3 p1x;
+		p1x.point[0] = x.point[0] - p1.point[0];
+		p1x.point[1] = x.point[1] - p1.point[1];
+		p1x.point[2] = x.point[2] - p1.point[2];
+
+		Point3 r;
+		crossProduct(p12, p1x, r);
+
+		dir = dotProduct(r, normal);
+
+		if (dir < 0)
+		{
+			if (dir > -EPS_IN_POLYGON) {
+				res = 0;
+			}
+			else {
+				return -1;
+			}
+		}
+		else if (dir < EPS_IN_POLYGON) {
+			res = 0;
+		}
+		else {
+			res = (res == 0) ? 0
+							 : 1;
+		}
+	}
+
+	return res;
 }
 
 bool inTriangle(const Point3 &x, const Point3 &a, const Point3 &b, const Point3 &c)
@@ -86,10 +140,10 @@ void intersection(const Point3 &source_point, const Point3 &source_vector,
 	res.point[2] = source_point.point[2] - t*source_vector.point[2];
 }
 
-void cp(const Point3 &p1, const Point3 &p2, float *res) {
-	res[0] = p1.point[1]*p2.point[2] - p1.point[2]*p2.point[1];
-	res[1] = p1.point[2]*p2.point[0] - p1.point[0]*p2.point[2];
-	res[2] = p1.point[0]*p2.point[1] - p1.point[1]*p2.point[0];
+void crossProduct(const Point3 &p1, const Point3 &p2, Point3 &res) {
+	res.point[0] = p1.point[1]*p2.point[2] - p1.point[2]*p2.point[1];
+	res.point[1] = p1.point[2]*p2.point[0] - p1.point[0]*p2.point[2];
+	res.point[2] = p1.point[0]*p2.point[1] - p1.point[1]*p2.point[0];
 }
 
 /// принадлежность точек отрезку/треугольнику
@@ -97,33 +151,24 @@ int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
 
-//	Point3 p1(0.1, 0.2, 0.3);
-//	Point3 p1(1.0, 0.0, 0.0);
-
-//	Point3 p2(1.0, 1.0, 1.0);
-//	Point3 p2(0.0, 1.0, 0.0);
-
-//	__m128 p = intersection_i(Point3(0.1, 0.2, 0.3), Point3(0.9, 0.1, 0.2), -0.8, Point3(1, 0.2, 0.3));
-//	printf_s("Result res: %f\t%f\t%f\t%f\n", p[0], p[1], p[2], p[3]);
-
-//	Point3 p = intersection(Point3(0.1, 0.2, 0.3), Point3(0.9, 0.1, 0.2), -0.8, Point3(1, 0.2, 0.3));
-//	printf_s("Result res: %f\t%f\t%f\t%f\n", p.point[0], p.point[1], p.point[2], p.point[3]);
-
-//	__m128 res = crossProduct(_mm_load_ps(p1.point), _mm_load_ps(p2.point));
-//	printf_s("Result res: %f\t%f\t%f\t%f\n", res[0], res[1], res[2], res[3]);
-
-//	__m128 a1 = _mm_load_ps(p1.point);
-//	__m128 a2 = _mm_load_ps(p2.point);
-//	__m128 res = _mm_dp_ps(a1, a2, 0x71);
-
-//	printf_s("Result res: %f\t%f\t%f\t%f\n", res[0], res[1], res[2], res[3]);
-
-//	printf_s("Result res: %f\t%f\t%f\t%f\n", res);
-
-	Point3 s_p(0.1, 0.2, 0.3);
-	Point3 s_v(0.9, 0.1, 0.2);
-	float d_param = -0.8;
-	Point3 n_v(1, 0.2, 0.3);
+	std::vector<Point3> polygon;
+	polygon.push_back(Point3(0, 0, 0));
+	polygon.push_back(Point3(1, -1, 0));
+	polygon.push_back(Point3(2, -1, 0));
+	polygon.push_back(Point3(3, 0, 0));
+	polygon.push_back(Point3(2, 1, 0));
+	polygon.push_back(Point3(1, 1, 0));
+	Point3 polyg[6];
+	polyg[0]=Point3(0, 0, 0);
+	polyg[1]=(Point3(1, -1, 0));
+	polyg[2]=(Point3(2, -1, 0));
+	polyg[3]=(Point3(3, 0, 0));
+	polyg[4]=(Point3(2, 1, 0));
+	polyg[5]=(Point3(1, 1, 0));
+	int res0 = inPolygon_i2(Point3(-1, 0, 0), polyg, Point3(0, 0, 1));
+	int res1 = inPolygon_i2(Point3(2, -1.0001, 0), polyg, Point3(0, 0, 1));
+	int res2 = inPolygon_i2(Point3(1, 0, 0), polyg, Point3(0, 0, 1));
+	cout << res0<< " "<<res1<<" "<<res2<<endl;
 
 	float count = 0;
 
@@ -131,18 +176,31 @@ int main(int argc, char *argv[])
 	cout << "Begin" << endl;
 	time.start();
 
-	for (int i = 0; i < 100000000; ++i)
+	for (int i = 0; i < 10000000; ++i)
 	{
-		bool ok = inLine_i(Point3(1, 2, 0.1), Point3(0, 3, 0.1), Point3(3, 0, 0.1));
+		//int res0 = inPolygon_i(Point3(-1, 0, 0), Point3(0, 0, 1), polygon);
+	//	int res1 = inPolygon_i(Point3(2, -1.0001, 0), polygon, Point3(0, 0, 1));
+	//	int res2 = inPolygon_i(Point3(1, 0, 0), polygon, Point3(0, 0, 1));
 
+		int res0 = inPolygon_i2(Point3(2, 0.0001, 0.01), polyg, Point3(0, 0, 1));
+		//int res1 = inPolygon_i2(Point3(2, -1.001, 0), polyg, Point3(0, 0, 1));
+		//int res2 = inPolygon_i2(Point3(1, 0, 0), polyg, Point3(0, 0, 1));
+		int res1 = inPolygon_i2(Point3(2, 0.0001, 0.01), polyg, Point3(0, 0, 1));
+		int res2 = inPolygon_i2(Point3(2, 0.0001, 0.01), polyg, Point3(0, 0, 1));
+//		int res0 = inPolygon(Point3(-1, 0, 0), polygon, Point3(0, 0, 1));
+//		int res1 = inPolygon(Point3(2, -1.0001, 0), polygon, Point3(0, 0, 1));
+//		int res2 = inPolygon(Point3(1, 0, 0), polygon, Point3(0, 0, 1));
+
+		count = res0 + res1 + res2;
 		//__m128 p = intersection_i(s_p, s_v, d_param, n_v);
 //		count += p[0];
 	//	count+=i;
 	}
-
 	cout << time.elapsed() << " msec" << endl;
-	cout << "End";
-	cout << count;
+
+	cout << "End" << endl;
+	cout << count << endl;
+
 
 //	qDebug() << ;
 	return a.exec();
