@@ -24,6 +24,7 @@ struct Point3
 struct Polygon
 {
 	Point3 vertices[32];
+	Point3 normal;
 	int size;
 
 	Polygon() {}
@@ -123,13 +124,13 @@ int inPolygon_i(const Point3 &x, const Point3 &normal, const std::vector<Point3>
 	return res;
 }
 
-int inPolygon_i2(const Point3 &x, const Polygon &polygon, const Point3 &normal)
+int inPolygon_i2(const Point3 &x, const Polygon &polygon)
 {
 	int res = 1;
 	int size = polygon.size;
 
 	__m128 _x = _mm_load_ps(x.point);
-	__m128 _n = _mm_load_ps(normal.point);
+	__m128 _n = _mm_load_ps(polygon.normal.point);
 
 	__m128 dir;
 	__m128 p1, p2;

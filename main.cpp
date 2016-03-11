@@ -159,6 +159,7 @@ int main(int argc, char *argv[])
 	polyg.vertices[3]=(Point3(3, 0, 0));
 	polyg.vertices[4]=(Point3(2, 1, 0));
 	polyg.vertices[5]=(Point3(1, 1, 0));
+	polyg.normal = Point3(0, 0, 1);
 
 //	Point3 polyg[6];
 //	polyg[0]=Point3(0, 0, 0);
@@ -167,9 +168,9 @@ int main(int argc, char *argv[])
 //	polyg[3]=(Point3(3, 0, 0));
 //	polyg[4]=(Point3(2, 1, 0));
 //	polyg[5]=(Point3(1, 1, 0));
-	int res0 = inPolygon_i2(Point3(-1, 0, 0), polyg, Point3(0, 0, 1));
-	int res1 = inPolygon_i2(Point3(2, -1.0001, 0), polyg, Point3(0, 0, 1));
-	int res2 = inPolygon_i2(Point3(1, 0, 0), polyg, Point3(0, 0, 1));
+	int res0 = inPolygon_i2(Point3(-1, 0, 0), polyg);
+	int res1 = inPolygon_i2(Point3(2, -1.0001, 0), polyg);
+	int res2 = inPolygon_i2(Point3(1, 0, 0), polyg);
 	cout << res0<< " "<<res1<<" "<<res2<<endl;
 
 	float count = 0;
@@ -184,11 +185,11 @@ int main(int argc, char *argv[])
 	//	int res1 = inPolygon_i(Point3(2, -1.0001, 0), polygon, Point3(0, 0, 1));
 	//	int res2 = inPolygon_i(Point3(1, 0, 0), polygon, Point3(0, 0, 1));
 
-		int res0 = inPolygon_i2(Point3(2, 0.0001, 0.01), polyg, Point3(0, 0, 1));
+		int res0 = inPolygon_i2(Point3(2, 0.0001, 0.01), polyg);
 		//int res1 = inPolygon_i2(Point3(2, -1.001, 0), polyg, Point3(0, 0, 1));
 		//int res2 = inPolygon_i2(Point3(1, 0, 0), polyg, Point3(0, 0, 1));
-		int res1 = inPolygon_i2(Point3(2, 0.0001, 0.01), polyg, Point3(0, 0, 1));
-		int res2 = inPolygon_i2(Point3(2, 0.0001, 0.01), polyg, Point3(0, 0, 1));
+		int res1 = inPolygon_i2(Point3(2, 0.0001, 0.01), polyg);
+		int res2 = inPolygon_i2(Point3(2, 0.0001, 0.01), polyg);
 //		int res0 = inPolygon(Point3(-1, 0, 0), polygon, Point3(0, 0, 1));
 //		int res1 = inPolygon(Point3(2, -1.0001, 0), polygon, Point3(0, 0, 1));
 //		int res2 = inPolygon(Point3(1, 0, 0), polygon, Point3(0, 0, 1));
