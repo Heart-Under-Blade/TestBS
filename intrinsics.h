@@ -21,14 +21,14 @@ struct Point3
 	}
 } __attribute__ ((aligned (16)));
 
-struct Polygon
+struct Facet
 {
 	Point3 vertices[32];
 	Point3 normal;
 	int size;
 
-	Polygon() {}
-	Polygon(int p_size) {
+	Facet() {}
+	Facet(int p_size) {
 		size = p_size;
 	}
 
@@ -81,50 +81,7 @@ __m128 intersection_i(const Point3 &source_point, const Point3 &source_vector,
 	return _mm_sub_ps(sp, mul);
 }
 
-int inPolygon_i(const Point3 &x, const Point3 &normal, const std::vector<Point3> &polygon)
-{
-	int res = -2;
-	int size = polygon.size();
-
-	__m128 _x = _mm_load_ps(x.point);
-	__m128 _n = _mm_load_ps(normal.point);
-
-	__m128 dir;
-	__m128 p1, p2;
-
-	p2 = _mm_load_ps(polygon.at(0).point);
-
-	for (int i = 1; i <= size; ++i)
-	{
-		p1 = p2;
-
-		p2 = (i != size) ? _mm_load_ps(polygon.at(i).point)
-						 : _mm_load_ps(polygon.at(0).point);
-
-		dir = _mm_dp_ps(crossProduct_i(_mm_sub_ps(p2, p1), _mm_sub_ps(_x, p1)), _n, 0x71);
-
-		if (dir[0] < 0)
-		{
-			if (dir[0] > -EPS_IN_POLYGON) {
-				res = 0;
-			}
-			else {
-				return -1;
-			}
-		}
-		else if (dir[0] < EPS_IN_POLYGON) {
-			res = 0;
-		}
-		else {
-			res = (res == 0) ? 0
-							 : 1;
-		}
-	}
-
-	return res;
-}
-
-int inPolygon_i2(const Point3 &x, const Polygon &polygon)
+int inFacet_i(const Point3 &x, const Facet &polygon)
 {
 	int res = 1;
 	int size = polygon.size;
