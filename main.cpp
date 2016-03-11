@@ -151,25 +151,25 @@ int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
 
-//	Polygon polyg(6);
-//	polyg.vertices[0]=Point3(0, 0, 0);
-//	polyg.vertices[1]=(Point3(1, -1, 0));
-//	polyg.vertices[2]=(Point3(2, -1, 0));
-//	polyg.vertices[3]=(Point3(3, 0, 0));
-//	polyg.vertices[4]=(Point3(2, 1, 0));
-//	polyg.vertices[5]=(Point3(1, 1, 0));
+	int size = 6;
+	Polygon polyg(6);
+	polyg.vertices[0]=Point3(0, 0, 0);
+	polyg.vertices[1]=(Point3(1, -1, 0));
+	polyg.vertices[2]=(Point3(2, -1, 0));
+	polyg.vertices[3]=(Point3(3, 0, 0));
+	polyg.vertices[4]=(Point3(2, 1, 0));
+	polyg.vertices[5]=(Point3(1, 1, 0));
 
-	Point3 polyg[6];
-	polyg[0]=Point3(0, 0, 0);
-	polyg[1]=(Point3(1, -1, 0));
-	polyg[2]=(Point3(2, -1, 0));
-	polyg[3]=(Point3(3, 0, 0));
-	polyg[4]=(Point3(2, 1, 0));
-	polyg[5]=(Point3(1, 1, 0));
-
-	int res0 = inPolygon_i2(Point3(-1, 0, 0), polyg, 6, Point3(0, 0, 1));
-	int res1 = inPolygon_i2(Point3(2, -1.0001, 0), polyg, 6, Point3(0, 0, 1));
-	int res2 = inPolygon_i2(Point3(1, 0, 0), polyg, 6, Point3(0, 0, 1));
+//	Point3 polyg[6];
+//	polyg[0]=Point3(0, 0, 0);
+//	polyg[1]=(Point3(1, -1, 0));
+//	polyg[2]=(Point3(2, -1, 0));
+//	polyg[3]=(Point3(3, 0, 0));
+//	polyg[4]=(Point3(2, 1, 0));
+//	polyg[5]=(Point3(1, 1, 0));
+	int res0 = inPolygon_i2(Point3(-1, 0, 0), polyg, Point3(0, 0, 1));
+	int res1 = inPolygon_i2(Point3(2, -1.0001, 0), polyg, Point3(0, 0, 1));
+	int res2 = inPolygon_i2(Point3(1, 0, 0), polyg, Point3(0, 0, 1));
 	cout << res0<< " "<<res1<<" "<<res2<<endl;
 
 	float count = 0;
@@ -184,11 +184,11 @@ int main(int argc, char *argv[])
 	//	int res1 = inPolygon_i(Point3(2, -1.0001, 0), polygon, Point3(0, 0, 1));
 	//	int res2 = inPolygon_i(Point3(1, 0, 0), polygon, Point3(0, 0, 1));
 
-		int res0 = inPolygon_i2(Point3(2, 0.0001, 0.01), polyg, 6, Point3(0, 0, 1));
+		int res0 = inPolygon_i2(Point3(2, 0.0001, 0.01), polyg, Point3(0, 0, 1));
 		//int res1 = inPolygon_i2(Point3(2, -1.001, 0), polyg, Point3(0, 0, 1));
 		//int res2 = inPolygon_i2(Point3(1, 0, 0), polyg, Point3(0, 0, 1));
-		int res1 = inPolygon_i2(Point3(2, 0.0001, 0.01), polyg, 6, Point3(0, 0, 1));
-		int res2 = inPolygon_i2(Point3(2, 0.0001, 0.01), polyg, 6, Point3(0, 0, 1));
+		int res1 = inPolygon_i2(Point3(2, 0.0001, 0.01), polyg, Point3(0, 0, 1));
+		int res2 = inPolygon_i2(Point3(2, 0.0001, 0.01), polyg, Point3(0, 0, 1));
 //		int res0 = inPolygon(Point3(-1, 0, 0), polygon, Point3(0, 0, 1));
 //		int res1 = inPolygon(Point3(2, -1.0001, 0), polygon, Point3(0, 0, 1));
 //		int res2 = inPolygon(Point3(1, 0, 0), polygon, Point3(0, 0, 1));

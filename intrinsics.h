@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INTRINSICS
+#define INTRINSICS
 
 #include <xmmintrin.h>
 #include <smmintrin.h>
@@ -7,7 +8,6 @@
 #define EPS_IN_LINE 0.001
 #define EPS_IN_POLYGON 0.001
 
-//////////////////////////////////////////////////
 struct Point3
 {
 	float point[4];
@@ -17,10 +17,10 @@ struct Point3
 		point[0] = x;
 		point[1] = y;
 		point[2] = z;
-//		point[3] = 0.0f;
+		point[3] = 0.0f;
 	}
 } __attribute__ ((aligned (16)));
-//////////////////////////////////////////////////
+
 struct Polygon
 {
 	Point3 vertices[32];
@@ -32,7 +32,7 @@ struct Polygon
 	}
 
 } __attribute__ ((aligned (16)));
-//////////////////////////////////////////////////
+
 bool inLine_i(const Point3 &x, const Point3 &a, const Point3 &b)
 {
 	__m128 _x = _mm_load_ps(x.point);
@@ -47,12 +47,14 @@ bool inLine_i(const Point3 &x, const Point3 &a, const Point3 &b)
 	__m128 sqr_len_ax = _mm_dp_ps(ax, ax, 0x71);
 	__m128 sqr_len_bx = _mm_dp_ps(bx, bx, 0x71);
 
-	return (sqr_len_ax[0] + sqr_len_bx[0] <= sqr_len_ab[0] + EPS_IN_LINE);
+	return (sqr_len_ax[0] + sqr_len_bx[0] < sqr_len_ab[0] + EPS_IN_LINE);
 }
-//////////////////////////////////////////////////
+
+///////////////////////////////////////
 //__m128 res = _mm_dp_ps(_mm_load_ps(p1.point), _mm_load_ps(p2.point), 0x71);
-//////////////////////////////////////////////////
-__m128 crossProduct_i(__m128 a, __m128 b)
+///////////////////////////////////////
+
+inline __m128 crossProduct_i(__m128 a, __m128 b)
 {
 	return _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(a, a, _MM_SHUFFLE(3,0,2,1)),
 								 _mm_shuffle_ps(b, b, _MM_SHUFFLE(3,1,0,2))),
@@ -77,27 +79,82 @@ __m128 intersection_i(const Point3 &source_point, const Point3 &source_vector,
 	__m128 mul = _mm_mul_ps(t, sv);
 	return _mm_sub_ps(sp, mul);
 }
-//////////////////////////////////////////////////
+
+int inPolygon_i(const Point3 &x, const Point3 &normal, const std::vector<Point3> &polygon)
+{
+	int res = -2;
+	int size = polygon.size();
+
+	__m128 _x = _mm_load_ps(x.point);
+	__m128 _n = _mm_load_ps(normal.point);
+
+	__m128 dir;
+	__m128 p1, p2;
+
+	p2 = _mm_load_ps(polygon.at(0).point);
+
+	for (int i = 1; i <= size; ++i)
+	{
+		p1 = p2;
+
+		p2 = (i != size) ? _mm_load_ps(polygon.at(i).point)
+						 : _mm_load_ps(polygon.at(0).point);
+
+		dir = _mm_dp_ps(crossProduct_i(_mm_sub_ps(p2, p1), _mm_sub_ps(_x, p1)), _n, 0x71);
+
+		if (dir[0] < 0)
+		{
+			if (dir[0] > -EPS_IN_POLYGON) {
+				res = 0;
+			}
+			else {
+				return -1;
+			}
+		}
+		else if (dir[0] < EPS_IN_POLYGON) {
+			res = 0;
+		}
+		else {
+			res = (res == 0) ? 0
+							 : 1;
+		}
+	}
+
+	return res;
+}
+
 int inPolygon_i2(const Point3 &x, const Polygon &polygon, const Point3 &normal)
 {
 	int res = 1;
 	int size = polygon.size;
-	int i = 0;
+
+	__m128 _x = _mm_load_ps(x.point);
+	__m128 _n = _mm_load_ps(normal.point);
 
 	__m128 dir;
+	__m128 p1, p2;
 
 	__m128 eps = _mm_set_ss(EPS_IN_POLYGON);
 	__m128 m_eps = _mm_set_ss(-EPS_IN_POLYGON);
 	__m128 zero = _mm_set_ss(0);
 
-	__m128 _x = _mm_load_ps(x.point);
-	__m128 _n = _mm_load_ps(normal.point);
+	p2 = _mm_load_ps(polygon.vertices[0].point);
 
-	__m128 p1 = _mm_load_ps(polygon.vertices[size-1].point);
-	__m128 p2 = _mm_load_ps(polygon.vertices[i].point);
+	for (int i = 1; i <= size; ++i)
+	{
+		p1 = p2;
 
-	do {
-		dir = _mm_dp_ps(crossProduct_i(_mm_sub_ps(p2, p1), _mm_sub_ps(_x, p1)), _n, 0x71);
+		p2 = (i != size) ? _mm_load_ps(polygon.vertices[i].point)
+						 : _mm_load_ps(polygon.vertices[0].point);
+
+		__m128 a= _mm_sub_ps(p2, p1);
+		__m128 b= _mm_sub_ps(_x, p1);
+
+
+		dir = _mm_dp_ps(_mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(a, a, _MM_SHUFFLE(3,0,2,1)),
+											  _mm_shuffle_ps(b, b, _MM_SHUFFLE(3,1,0,2))),
+								   _mm_mul_ps(_mm_shuffle_ps(a, a, _MM_SHUFFLE(3,1,0,2)),
+											  _mm_shuffle_ps(b, b, _MM_SHUFFLE(3,0,2,1)))), _n, 0x71);
 
 		if (_mm_ucomilt_ss(dir, zero))
 		{
@@ -112,57 +169,9 @@ int inPolygon_i2(const Point3 &x, const Polygon &polygon, const Point3 &normal)
 		else if (_mm_ucomilt_ss(dir, eps)) {
 			res = 0;
 		}
-
-		++i;
-		p1 = p2;
-		p2 = _mm_load_ps(polygon.vertices[i].point);
 	}
-	while (i < size);
 
 	return res;
 }
-
-//int inPolygon_i2(const Point3 &x, Point3 polygon[], int size, const Point3 &normal)
-//{
-//	int res = 1;
-
-//	__m128 _x = _mm_load_ps(x.point);
-//	__m128 _n = _mm_load_ps(normal.point);
-
-//	__m128 dir;
-
-//	__m128 eps = _mm_set_ss(EPS_IN_POLYGON);
-//	__m128 m_eps = _mm_set_ss(-EPS_IN_POLYGON);
-//	__m128 zero = _mm_set_ss(0);
-
-//	int i = 0;
-
-//	__m128 p1 = _mm_load_ps(polygon[size-1].point);
-//	__m128 p2 = _mm_load_ps(polygon[i].point);
-
-//	do {
-//		dir = _mm_dp_ps(crossProduct_i(_mm_sub_ps(p2, p1), _mm_sub_ps(_x, p1)), _n, 0x71);
-
-//		if (_mm_ucomilt_ss(dir, zero))
-//		{
-//			if (_mm_ucomigt_ss(dir, m_eps)) {
-//				res = 0;
-//			}
-//			else {
-////				res = -1;
-//				return -1;
-//			}
-//		}
-//		else if (_mm_ucomilt_ss(dir, eps)) {
-//			res = 0;
-//		}
-
-//		++i;
-//		p1 = p2;
-//		p2 = _mm_load_ps(polygon[i].point);
-//	}
-//	while (i < size);
-
-//	return res;
-//}
+#endif // INTRINSICS
 

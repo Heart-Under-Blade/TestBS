@@ -1,1 +1,1 @@
-inPolygon 1358
+inPolygon < 1100
