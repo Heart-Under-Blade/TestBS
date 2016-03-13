@@ -1,0 +1,4 @@
+#ifndef NON_INTRINSICS_H
+#define NON_INTRINSICS_H
+
+#endif // NON_INTRINSICS_H
