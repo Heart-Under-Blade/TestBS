@@ -1,1 +1,1 @@
-inPolygon < 1100
+inFacet 1250

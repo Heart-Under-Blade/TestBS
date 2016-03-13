@@ -18,7 +18,9 @@ QMAKE_CFLAGS+=-march=corei7 -msse4.2 -O2
 QMAKE_CXXFLAGS-=-O2
 QMAKE_CXXFLAGS+=-march=corei7 -msse4.2 -O2
 HEADERS += \
-    intrinsics.h
+    intrinsics.h \
+    types.h \
+    non_intrinsics.h
 
 OTHER_FILES += \
     log.txt
