@@ -104,14 +104,12 @@ void inFacet_i(const Point3 &x, const Facet &facet, PointPosition &pos)
 	__m128 eps = _mm_set_ss(EPS_IN_POLYGON);
 	__m128 m_eps = _mm_set_ss(-EPS_IN_POLYGON);
 
-	p2 = _mm_load_ps(facet.vertices[0].point);
+	p2 = _mm_load_ps(facet.vertices[size-1].point);
 
-	for (int i = 1; i <= size; ++i)
+	for (int i = 1; i < size; ++i)
 	{
 		p1 = p2;
-
-		p2 = (i != size) ? _mm_load_ps(facet.vertices[i].point)
-						 : _mm_load_ps(facet.vertices[0].point);
+		p2 = _mm_load_ps(facet.vertices[i].point);
 
 		__m128 a= _mm_sub_ps(p2, p1);
 		__m128 b= _mm_sub_ps(_x, p1);
@@ -136,6 +134,62 @@ void inFacet_i(const Point3 &x, const Facet &facet, PointPosition &pos)
 			else {
 				pos.facet_side_index_2 = i-1;
 			}
+		}
+	}
+}
+
+__m128 intersection_line_facet_i(const Point3 &a, const Point3 &b, const Facet &facet)
+{
+	int size = facet.size;
+
+	__m128 p1, p2;
+	__m128 n = _mm_load_ps(facet.normal.point);
+
+	__m128 _a = _mm_load_ps(a.point);
+	__m128 source_vector = _mm_sub_ps(_mm_load_ps(b.point), _a);
+
+	p2 = _mm_load_ps(facet.vertices[size-1].point);
+
+	for (int i = 1; i < size; ++i)
+	{
+		p1 = p2;
+		p2 = _mm_load_ps(facet.vertices[i].point);
+
+		__m128 p12 = _mm_sub_ps(p2, p1);
+
+		/// normal of new plane (cross product)
+		__m128 n2 = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(p12, p12, _MM_SHUFFLE(3,0,2,1)),
+										  _mm_shuffle_ps(n, n, _MM_SHUFFLE(3,1,0,2))),
+							   _mm_mul_ps(_mm_shuffle_ps(p12, p12, _MM_SHUFFLE(3,1,0,2)),
+										  _mm_shuffle_ps(n, n, _MM_SHUFFLE(3,0,2,1))));
+
+		/// normalize normal
+		__m128 nn2 = _mm_rsqrt_ps(_mm_dp_ps(n2, n2, 0x7F));
+
+		/// D
+		__m128 m_d_param = _mm_dp_ps(p1, nn2, 0x7F);
+
+		/// intersection vector and new plane
+		__m128 dp0 = _mm_dp_ps(source_vector, nn2, 0x7F);
+		__m128 dp1 = _mm_dp_ps(_a, nn2, 0x7F);
+
+		__m128 add = _mm_add_ps(dp1, -m_d_param);
+		__m128 t = _mm_div_ps(add, dp0);
+
+		__m128 mul = _mm_mul_ps(t, source_vector);
+		__m128 p = _mm_sub_ps(_a, mul);
+
+		/// is point in line
+		__m128 ab = _mm_sub_ps(p1, p2);
+		__m128 ax = _mm_sub_ps(p1, p);
+		__m128 bx = _mm_sub_ps(p2, p);
+
+		__m128 sqr_len_ab = _mm_dp_ps(ab, ab, 0x71);
+		__m128 sqr_len_ax = _mm_dp_ps(ax, ax, 0x71);
+		__m128 sqr_len_bx = _mm_dp_ps(bx, bx, 0x71);
+
+		if (sqr_len_ax[0] + sqr_len_bx[0] < sqr_len_ab[0] + EPS_IN_LINE) {
+			return p;
 		}
 	}
 }

@@ -11,7 +11,6 @@ TEMPLATE = app
 
 SOURCES += main.cpp
 
-
 QMAKE_CFLAGS-=-O2
 QMAKE_CFLAGS+=-march=corei7 -msse4.2 -O2
 
