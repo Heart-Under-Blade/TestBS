@@ -23,22 +23,19 @@ int main(int argc, char *argv[])
 	polyg.vertices[5]=(Point3(1, 1, 0));
 	polyg.normal = Point3(0, 0, 1);
 
+	__m128 b = intersection_line_facet_i(Point3(1.5, -2, 0), Point3(1.5, 0, 0), polyg);
+	__m128 c = intersection_line_facet_i(Point3(1.5, 2, 0), Point3(1.5, 0, 0), polyg);
+	__m128 d = intersection_line_facet_i(Point3(4, 0, 0), Point3(1.5, 0, 0), polyg);
+	cout << b[0] << " " << b[1] << " " << b[2] << endl;
+	cout << c[0] << " " << c[1] << " " << c[2] << endl;
+	cout << d[0] << " " << d[1] << " " << d[2] << endl;
 
-//	int res0 = inFacet_i(Point3(-1, 0, 0), a, b, polyg);
-//	int res1 = inFacet_i(Point3(2, -1.0001, a, b, 0), polyg);
-//	int res2 = inFacet_i(Point3(1, 0, 0), a, b, polyg);
+//	PointPosition res3;
+//	inFacet_i(Point3(2, 1, 0), polyg, res3);
+//	cout << res3.position << " " << res3.facet_side_index_1
+//		 << " " << res3.facet_side_index_2 << endl;
 
-//	cout << res0 << " " << res1 << " " << res2 << endl;
-
-//	int res3 = inFacet_i(Point3(1.5, -1, 0), polyg, s1, s2);
-//	cout << res3 << " " << s1 << " " << s2 << endl;
-
-	PointPosition res3;
-	inFacet_i(Point3(2, 1, 0), polyg, res3);
-	cout << res3.position << " " << res3.facet_side_index_1
-		 << " " << res3.facet_side_index_2 << endl;
-
-//	return a.exec();
+	return a.exec();
 
 	float count = 0;
 

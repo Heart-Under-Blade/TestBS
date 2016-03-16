@@ -11,11 +11,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp
 
-QMAKE_CFLAGS-=-O2
-QMAKE_CFLAGS+=-march=corei7 -msse4.2 -O2
+#QMAKE_CFLAGS-=-O2
+QMAKE_CFLAGS+=-march=corei7 -msse4.2
 
-QMAKE_CXXFLAGS-=-O2
-QMAKE_CXXFLAGS+=-march=corei7 -msse4.2 -O2
+#QMAKE_CXXFLAGS-=-O2
+QMAKE_CXXFLAGS+=-march=corei7 -msse4.2
 HEADERS += \
     intrinsics.h \
     types.h \
