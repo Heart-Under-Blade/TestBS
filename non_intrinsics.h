@@ -19,7 +19,8 @@ int inPolygon(const Point3 &x, const std::vector<Point3> &polygon, const Point3 
 {
 	int res = -2;
 	int size = polygon.size();
-float dir;
+	float dir;
+
 	for (int i = 1; i <= size; ++i)
 	{
 		Point3 p1, p2;

@@ -32,3 +32,15 @@ struct Facet
 	}
 
 } __attribute__ ((aligned (16)));
+
+struct Polygon
+{
+	Point3 points[32];
+	int size;
+
+	Polygon() {}
+	Polygon(int p_size) {
+		size = p_size;
+	}
+
+} __attribute__ ((aligned (16)));

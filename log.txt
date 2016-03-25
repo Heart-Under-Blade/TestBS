@@ -1,1 +1,1 @@
-inFacet 1250
+intersection 2870-3050
